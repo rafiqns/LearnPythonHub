@@ -47,9 +47,9 @@
                 {% endif %}
                 <a href="{{ url_for('content.chapter_detail', chapter_id=chapter.id) }}" 
                    class="btn btn-primary">Start Learning</a>
-                {% if current_user.is_authenticated and chapter.id == chapters|last|attr('id') %}
+                {% if current_user.is_authenticated %}
                 <a href="{{ url_for('progress.show_certificate', chapter_id=chapter.id) }}" 
-                   class="btn btn-success ms-2 certificate-btn" style="display: none;">
+                   class="btn btn-success ms-2 certificate-btn" style="display: none;" data-chapter-id="{{ chapter.id }}">
                    <i class="fas fa-award"></i> View Certificate
                 </a>
                 {% endif %}
@@ -88,14 +88,19 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Periksa apakah chapter ini sudah 100%
                 if (data.percentage === 100) {
                     completedChapters++;
-                }
-                
-                // Periksa apakah semua chapter sudah selesai
-                if (completedChapters === totalChapters) {
-                    const certificateBtn = document.querySelector('.certificate-btn');
+                    
+                    // Tampilkan tombol certificate untuk chapter yang sudah selesai
+                    const chapterId = card.querySelector('a').href.split('/').pop();
+                    const certificateBtn = card.querySelector(`.certificate-btn[data-chapter-id="${chapterId}"]`);
                     if (certificateBtn) {
                         certificateBtn.style.display = 'inline-block';
                     }
+                }
+                
+                // Periksa apakah semua chapter sudah selesai (untuk kompatibilitas)
+                if (completedChapters === totalChapters) {
+                    // Semua chapter sudah selesai
+                    console.log("All chapters completed!");
                 }
             });
     });
