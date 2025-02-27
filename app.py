@@ -12,8 +12,12 @@ app = Flask(__name__)
 app.secret_key = os.environ.get("SESSION_SECRET", "dev_key_only")
 
 # Database configuration
-app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///learn_python.db"
+app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DATABASE_URL")
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
+    "pool_recycle": 300,
+    "pool_pre_ping": True,
+}
 
 # Initialize SQLAlchemy
 db = SQLAlchemy()
@@ -38,7 +42,8 @@ app.register_blueprint(auth_bp)
 app.register_blueprint(admin_bp)
 app.register_blueprint(content_bp)
 
-# Import models and create tables
+# Create all database tables
 with app.app_context():
     from models import User, Chapter, SubChapter, Content
     db.create_all()
+    logging.info("Database tables created successfully")
