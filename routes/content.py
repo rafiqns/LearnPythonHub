@@ -17,7 +17,19 @@ def chapter_detail(chapter_id):
     if chapter.is_pro and not current_user.is_pro:
         flash('This content is only available for Pro users', 'warning')
         return redirect(url_for('content.index'))
-    return render_template('content/chapter_detail.html', chapter=chapter)
+
+    # Determine if this is the last chapter
+    last_chapter = Chapter.query.order_by(Chapter.order.desc()).first()
+    is_last_chapter = chapter.id == last_chapter.id
+
+    # Get the last subchapter of this chapter
+    last_subchapter = SubChapter.query.filter_by(chapter_id=chapter.id)\
+        .order_by(SubChapter.order.desc()).first()
+
+    return render_template('content/chapter_detail.html', 
+                         chapter=chapter,
+                         is_last_chapter=is_last_chapter,
+                         is_last_subchapter=lambda s: s.id == last_subchapter.id if last_subchapter else False)
 
 @content_bp.route('/checkout')
 @login_required

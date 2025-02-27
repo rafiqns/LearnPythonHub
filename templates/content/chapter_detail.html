@@ -52,7 +52,7 @@
                 {% endfor %}
 
                 <div class="text-center mt-4">
-                    {% if loop.last and loop.parent.last %}
+                    {% if is_last_subchapter and is_last_chapter %}
                     <button class="btn btn-success btn-finish" data-subchapter-id="{{ subchapter.id }}">
                         <i class="fas fa-flag-checkered"></i> Finish Chapter
                     </button>
