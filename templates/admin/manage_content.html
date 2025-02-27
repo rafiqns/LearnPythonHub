@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Manage Content</h2>
+
+<div class="row mt-4">
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h4>Add Chapter</h4>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('admin.add_chapter') }}">
+                    {{ chapter_form.hidden_tag() }}
+                    <div class="mb-3">
+                        {{ chapter_form.title.label(class="form-label") }}
+                        {{ chapter_form.title(class="form-control") }}
+                    </div>
+                    <div class="mb-3">
+                        {{ chapter_form.description.label(class="form-label") }}
+                        {{ chapter_form.description(class="form-control") }}
+                    </div>
+                    <div class="mb-3">
+                        {{ chapter_form.order.label(class="form-label") }}
+                        {{ chapter_form.order(class="form-control") }}
+                    </div>
+                    <div class="mb-3 form-check">
+                        {{ chapter_form.is_pro(class="form-check-input") }}
+                        {{ chapter_form.is_pro.label(class="form-check-label") }}
+                    </div>
+                    <button type="submit" class="btn btn-primary">Add Chapter</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h4>Current Content Structure</h4>
+            </div>
+            <div class="card-body">
+                {% for chapter in chapters %}
+                <div class="chapter-item mb-4">
+                    <h5>{{ chapter.title }}</h5>
+                    <p>{{ chapter.description }}</p>
+                    {% if chapter.is_pro %}
+                    <span class="badge bg-warning">Pro Content</span>
+                    {% endif %}
+                    
+                    <div class="subchapters ms-4 mt-2">
+                        {% for subchapter in chapter.subchapters %}
+                        <div class="subchapter-item">
+                            <h6>{{ subchapter.title }}</h6>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

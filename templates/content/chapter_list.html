@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Python Learning Chapters</h2>
+
+<div class="row mt-4">
+    {% for chapter in chapters %}
+    <div class="col-md-6 mb-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">{{ chapter.title }}</h5>
+                <p class="card-text">{{ chapter.description }}</p>
+                {% if chapter.is_pro and not current_user.is_pro %}
+                <div class="alert alert-warning">
+                    <i class="fas fa-lock"></i> Pro content
+                </div>
+                {% endif %}
+                <a href="{{ url_for('content.chapter_detail', chapter_id=chapter.id) }}" 
+                   class="btn btn-primary">Start Learning</a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

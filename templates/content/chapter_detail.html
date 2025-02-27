@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block content %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ url_for('content.index') }}">Chapters</a></li>
+        <li class="breadcrumb-item active">{{ chapter.title }}</li>
+    </ol>
+</nav>
+
+<h2>{{ chapter.title }}</h2>
+<p class="lead">{{ chapter.description }}</p>
+
+{% for subchapter in chapter.subchapters %}
+<div class="card mb-4">
+    <div class="card-header">
+        <h4>{{ subchapter.title }}</h4>
+    </div>
+    <div class="card-body">
+        {% for content in subchapter.contents %}
+        <div class="content-item mb-4">
+            {% if content.content_type == 'text' %}
+                {{ content.content|safe }}
+            {% elif content.content_type == 'video' %}
+                <div class="ratio ratio-16x9">
+                    <iframe src="{{ content.content }}" allowfullscreen></iframe>
+                </div>
+            {% elif content.content_type == 'link' %}
+                <a href="{{ content.content }}" target="_blank" class="btn btn-info">
+                    <i class="fas fa-external-link-alt"></i> External Resource
+                </a>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endfor %}
+{% endblock %}

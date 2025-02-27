@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h3>Upgrade to Pro</h3>
+            </div>
+            <div class="card-body">
+                <div class="pricing-header text-center">
+                    <h4>Pro Membership Benefits</h4>
+                    <ul class="list-unstyled mt-3">
+                        <li><i class="fas fa-check text-success"></i> Access all premium content</li>
+                        <li><i class="fas fa-check text-success"></i> Advanced Python topics</li>
+                        <li><i class="fas fa-check text-success"></i> Project-based learning</li>
+                    </ul>
+                </div>
+
+                <div class="text-center mt-4">
+                    <h3>$49.99</h3>
+                    <form action="{{ url_for('content.process_payment') }}" method="POST">
+                        <button type="submit" class="btn btn-success btn-lg">
+                            Upgrade Now
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
