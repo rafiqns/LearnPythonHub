@@ -40,6 +40,8 @@
     border-radius: 15px;
     position: relative;
     overflow: hidden;
+    padding: 40px !important;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
 }
 
 .certificate::before {
@@ -107,6 +109,16 @@
     /* Prevent page breaks inside certificate */
     .certificate-container {
         page-break-inside: avoid;
+    }
+    /* Background dark tidak muncul saat print */
+    .bg-dark {
+        background-color: white !important;
+    }
+    /* Icon award tetap terlihat */
+    .fa-award {
+        color: gold !important;
+        print-color-adjust: exact;
+        -webkit-print-color-adjust: exact;
     }
 }
 </style>
