@@ -37,13 +37,15 @@ def load_user(user_id):
 from routes.auth import auth_bp
 from routes.admin import admin_bp
 from routes.content import content_bp
+from routes.progress import progress_bp
 
 app.register_blueprint(auth_bp)
 app.register_blueprint(admin_bp)
 app.register_blueprint(content_bp)
+app.register_blueprint(progress_bp)
 
 # Create all database tables
 with app.app_context():
-    from models import User, Chapter, SubChapter, Content
+    from models import User, Chapter, SubChapter, Content, UserProgress
     db.create_all()
     logging.info("Database tables created successfully")

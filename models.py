@@ -11,6 +11,7 @@ class User(UserMixin, db.Model):
     is_admin = db.Column(db.Boolean, default=False)
     is_pro = db.Column(db.Boolean, default=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    progress = db.relationship('UserProgress', backref='user', lazy=True)
 
 class Chapter(db.Model):
     __tablename__ = 'chapters'
@@ -28,6 +29,7 @@ class SubChapter(db.Model):
     title = db.Column(db.String(200), nullable=False)
     order = db.Column(db.Integer)
     contents = db.relationship('Content', backref='subchapter', lazy=True)
+    progress = db.relationship('UserProgress', backref='subchapter', lazy=True)
 
 class Content(db.Model):
     __tablename__ = 'contents'
@@ -36,3 +38,12 @@ class Content(db.Model):
     content_type = db.Column(db.String(20), nullable=False)  # text, video, link
     content = db.Column(db.Text, nullable=False)
     order = db.Column(db.Integer)
+
+class UserProgress(db.Model):
+    __tablename__ = 'user_progress'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    subchapter_id = db.Column(db.Integer, db.ForeignKey('subchapters.id'), nullable=False)
+    completed = db.Column(db.Boolean, default=False)
+    completed_at = db.Column(db.DateTime)
+    certificate_generated = db.Column(db.Boolean, default=False)
