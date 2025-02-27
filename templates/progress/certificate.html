@@ -9,7 +9,7 @@
                 <i class="fas fa-award text-warning display-1"></i>
             </div>
         </div>
-        
+
         <div class="certificate-body my-5">
             <p class="lead">This is to certify that</p>
             <h2 class="display-5 text-primary mb-4">{{ current_user.username }}</h2>
@@ -17,47 +17,16 @@
             <h3 class="display-6 text-info mb-4">{{ chapter.title }}</h3>
             <p class="text-muted">Completed on {{ current_user.progress[-1].completed_at.strftime('%B %d, %Y') }}</p>
         </div>
-        
+
         <div class="certificate-footer mt-5">
-            <div class="confetti-animation" id="confetti"></div>
-            <a href="{{ url_for('content.index') }}" class="btn btn-primary mt-4">
-                <i class="fas fa-home"></i> Back to Chapters
-            </a>
+            <p>Congratulations on your achievement!</p>
+            <div class="mt-4">
+                <a href="{{ url_for('content.index') }}" class="btn btn-primary">Return to Chapters</a>
+                <button class="btn btn-secondary ms-2" onclick="window.print()">Print Certificate</button>
+            </div>
         </div>
     </div>
 </div>
-
-<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Trigger confetti animation
-    var duration = 15 * 1000;
-    var animationEnd = Date.now() + duration;
-    var defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
-
-    function randomInRange(min, max) {
-        return Math.random() * (max - min) + min;
-    }
-
-    var interval = setInterval(function() {
-        var timeLeft = animationEnd - Date.now();
-
-        if (timeLeft <= 0) {
-            return clearInterval(interval);
-        }
-
-        var particleCount = 50 * (timeLeft / duration);
-        confetti(Object.assign({}, defaults, {
-            particleCount,
-            origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 }
-        }));
-        confetti(Object.assign({}, defaults, {
-            particleCount,
-            origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 }
-        }));
-    }, 250);
-});
-</script>
 
 <style>
 .certificate-container {
@@ -93,6 +62,24 @@ document.addEventListener('DOMContentLoaded', function() {
     0% { transform: scale(1); }
     50% { transform: scale(1.05); }
     100% { transform: scale(1); }
+}
+
+@media print {
+    body * {
+        visibility: hidden;
+    }
+    .certificate, .certificate * {
+        visibility: visible;
+    }
+    .certificate {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+    }
+    .btn {
+        display: none;
+    }
 }
 </style>
 {% endblock %}
