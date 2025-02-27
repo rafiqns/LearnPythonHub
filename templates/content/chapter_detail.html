@@ -25,10 +25,8 @@
                     data-bs-toggle="collapse" 
                     data-bs-target="#collapse{{ subchapter.id }}"
                     {% if not loop.first %}disabled{% endif %}>
+                <i class="fas fa-check-circle text-success me-2 completion-status d-none"></i>
                 {{ subchapter.title }}
-                <span class="ms-auto completion-status">
-                    <i class="fas fa-check-circle text-success d-none"></i>
-                </span>
             </button>
         </h2>
         <div id="collapse{{ subchapter.id }}" 
@@ -52,7 +50,11 @@
                 {% endfor %}
 
                 <div class="text-center mt-4">
-                    {% if is_last_subchapter and is_last_chapter %}
+                    {% if is_last_chapter and is_last_subchapter(subchapter) %}
+                    <button class="btn btn-success btn-complete-course" data-subchapter-id="{{ subchapter.id }}">
+                        <i class="fas fa-graduation-cap"></i> Complete Course
+                    </button>
+                    {% elif loop.last %}
                     <button class="btn btn-success btn-finish" data-subchapter-id="{{ subchapter.id }}">
                         <i class="fas fa-flag-checkered"></i> Finish Chapter
                     </button>
@@ -91,14 +93,14 @@ document.addEventListener('DOMContentLoaded', function() {
             if (index <= completedCount) {
                 card.querySelector('.accordion-button').removeAttribute('disabled');
                 if (index < completedCount) {
-                    card.querySelector('.completion-status i').classList.remove('d-none');
+                    card.querySelector('.completion-status').classList.remove('d-none');
                 }
             }
         });
     }
 
-    // Handle Done/Finish button clicks
-    document.querySelectorAll('.btn-done, .btn-finish').forEach(button => {
+    // Handle Done/Finish/Complete Course button clicks
+    document.querySelectorAll('.btn-done, .btn-finish, .btn-complete-course').forEach(button => {
         button.addEventListener('click', function() {
             const subchapterId = this.dataset.subchapterId;
             fetch(`/progress/${subchapterId}/complete`, {
