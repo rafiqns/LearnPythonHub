@@ -17,6 +17,12 @@
                 {% endif %}
                 <a href="{{ url_for('content.chapter_detail', chapter_id=chapter.id) }}" 
                    class="btn btn-primary">Start Learning</a>
+                {% if current_user.is_authenticated and chapter.id == chapters|last|attr('id') %}
+                <a href="{{ url_for('progress.show_certificate', chapter_id=chapter.id) }}" 
+                   class="btn btn-success ms-2">
+                   <i class="fas fa-award"></i> View Certificate
+                </a>
+                {% endif %}
             </div>
             {% if current_user.is_authenticated %}
             <div class="card-footer">

@@ -51,7 +51,24 @@ def complete_subchapter(subchapter_id):
 @login_required
 def show_certificate(chapter_id):
     chapter = Chapter.query.get_or_404(chapter_id)
-    return render_template('progress/certificate.html', chapter=chapter)
+    # Cek apakah ini chapter terakhir
+    last_chapter = Chapter.query.order_by(Chapter.order.desc()).first()
+    
+    if chapter.id == last_chapter.id:
+        # Cek apakah pengguna telah menyelesaikan semua subchapter
+        subchapters = SubChapter.query.filter_by(chapter_id=chapter_id).all()
+        subchapter_ids = [s.id for s in subchapters]
+        completed_count = UserProgress.query.filter(
+            UserProgress.user_id == current_user.id,
+            UserProgress.subchapter_id.in_(subchapter_ids),
+            UserProgress.completed == True
+        ).count()
+        
+        if completed_count == len(subchapters):
+            return render_template('progress/certificate.html', chapter=chapter)
+    
+    # Jika belum menyelesaikan chapter terakhir, redirect ke chapter detail
+    return redirect(url_for('content.chapter_detail', chapter_id=chapter_id))
 
 @progress_bp.route('/progress/status/<int:chapter_id>')
 @login_required
