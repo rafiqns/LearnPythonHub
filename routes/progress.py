@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify, redirect, url_for, render_template
+from flask import Blueprint, jsonify, redirect, url_for, render_template, flash
 from flask_login import current_user, login_required
 from app import db
 from models import UserProgress, SubChapter, Chapter
@@ -83,3 +83,19 @@ def get_progress(chapter_id):
         'completed': completed_subchapters,
         'percentage': round(progress_percentage, 1)
     })
+
+@progress_bp.route('/reset-progress', methods=['POST'])
+@login_required
+def reset_progress():
+    try:
+        # Hapus semua progress untuk user yang sedang login
+        UserProgress.query.filter_by(user_id=current_user.id).delete()
+        db.session.commit()
+        logging.info(f"Progress reset for user {current_user.username}")
+        flash('Progress pembelajaran Anda telah direset', 'success')
+        return redirect(url_for('content.index'))
+    except Exception as e:
+        db.session.rollback()
+        logging.error(f"Error resetting progress: {str(e)}")
+        flash('Terjadi kesalahan saat mereset progress', 'danger')
+        return redirect(url_for('content.index'))

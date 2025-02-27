@@ -3,6 +3,36 @@
 {% block content %}
 <h2>Python Learning Chapters</h2>
 
+{% if current_user.is_authenticated %}
+<div class="d-flex justify-content-end mb-3">
+    <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#resetProgressModal">
+        <i class="fas fa-trash"></i> Reset Progress
+    </button>
+</div>
+
+<!-- Modal Konfirmasi Reset Progress -->
+<div class="modal fade" id="resetProgressModal" tabindex="-1" aria-labelledby="resetProgressModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="resetProgressModalLabel">Konfirmasi Reset Progress</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Apakah Anda yakin ingin menghapus semua progress pembelajaran Anda?</p>
+                <p class="text-danger"><strong>Perhatian:</strong> Tindakan ini tidak dapat dibatalkan.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                <form action="{{ url_for('progress.reset_progress') }}" method="POST">
+                    <button type="submit" class="btn btn-danger">Ya, Reset Progress</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
 <div class="row mt-4">
     {% for chapter in chapters %}
     <div class="col-md-6 mb-4">
