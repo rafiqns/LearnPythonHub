@@ -19,7 +19,7 @@
                    class="btn btn-primary">Start Learning</a>
                 {% if current_user.is_authenticated and chapter.id == chapters|last|attr('id') %}
                 <a href="{{ url_for('progress.show_certificate', chapter_id=chapter.id) }}" 
-                   class="btn btn-success ms-2">
+                   class="btn btn-success ms-2 certificate-btn" style="display: none;">
                    <i class="fas fa-award"></i> View Certificate
                 </a>
                 {% endif %}
@@ -41,7 +41,11 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // Load progress for each chapter
-    document.querySelectorAll('.card').forEach(card => {
+    const chapters = document.querySelectorAll('.card');
+    let totalChapters = chapters.length;
+    let completedChapters = 0;
+    
+    chapters.forEach(card => {
         const chapterId = card.querySelector('a').href.split('/').pop();
         fetch(`/progress/status/${chapterId}`)
             .then(response => response.json())
@@ -50,6 +54,19 @@ document.addEventListener('DOMContentLoaded', function() {
                 progressBar.style.width = data.percentage + '%';
                 progressBar.textContent = data.percentage + '%';
                 progressBar.setAttribute('aria-valuenow', data.percentage);
+                
+                // Periksa apakah chapter ini sudah 100%
+                if (data.percentage === 100) {
+                    completedChapters++;
+                }
+                
+                // Periksa apakah semua chapter sudah selesai
+                if (completedChapters === totalChapters) {
+                    const certificateBtn = document.querySelector('.certificate-btn');
+                    if (certificateBtn) {
+                        certificateBtn.style.display = 'inline-block';
+                    }
+                }
             });
     });
 });
