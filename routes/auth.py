@@ -16,26 +16,38 @@ def login():
             login_user(user)
             next_page = request.args.get('next')
             return redirect(next_page or url_for('content.index'))
-        flash('Invalid username or password', 'danger')
+        flash('Username atau password salah', 'danger')
     return render_template('auth/login.html', form=form)
 
 @auth_bp.route('/register', methods=['GET', 'POST'])
 def register():
     form = RegisterForm()
     if form.validate_on_submit():
+        # Check if username already exists
         if User.query.filter_by(username=form.username.data).first():
-            flash('Username already exists', 'danger')
+            flash('Username sudah digunakan', 'danger')
             return render_template('auth/register.html', form=form)
-        
-        user = User(
-            username=form.username.data,
-            email=form.email.data,
-            password_hash=generate_password_hash(form.password.data)
-        )
-        db.session.add(user)
-        db.session.commit()
-        flash('Registration successful! Please login.', 'success')
-        return redirect(url_for('auth.login'))
+
+        # Check if email already exists
+        if User.query.filter_by(email=form.email.data).first():
+            flash('Email sudah terdaftar', 'danger')
+            return render_template('auth/register.html', form=form)
+
+        try:
+            user = User(
+                username=form.username.data,
+                email=form.email.data,
+                password_hash=generate_password_hash(form.password.data)
+            )
+            db.session.add(user)
+            db.session.commit()
+            flash('Registrasi berhasil! Silakan login.', 'success')
+            return redirect(url_for('auth.login'))
+        except Exception as e:
+            db.session.rollback()
+            flash('Terjadi kesalahan saat registrasi. Silakan coba lagi.', 'danger')
+            return render_template('auth/register.html', form=form)
+
     return render_template('auth/register.html', form=form)
 
 @auth_bp.route('/logout')
