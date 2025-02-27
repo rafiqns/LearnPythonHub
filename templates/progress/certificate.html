@@ -1,3 +1,4 @@
+
 {% extends "base.html" %}
 
 {% block content %}
@@ -21,8 +22,8 @@
         <div class="certificate-footer mt-5">
             <p>Congratulations on your achievement!</p>
             <div class="mt-4">
-                <a href="{{ url_for('content.index') }}" class="btn btn-primary">Return to Chapters</a>
-                <button class="btn btn-secondary ms-2" onclick="window.print()">Print Certificate</button>
+                <a href="{{ url_for('content.index') }}" class="btn btn-primary no-print">Return to Chapters</a>
+                <button class="btn btn-secondary ms-2 no-print" onclick="window.print()">Print Certificate</button>
             </div>
         </div>
     </div>
@@ -76,9 +77,36 @@
         left: 0;
         top: 0;
         width: 100%;
+        height: 100%;
+        box-shadow: none;
+        border: none;
+        background-color: white !important;
+        color: black !important;
     }
-    .btn {
-        display: none;
+    .no-print {
+        display: none !important;
+    }
+    .certificate-header h1 {
+        color: #000 !important;
+    }
+    .certificate-body h2 {
+        color: #007bff !important;
+    }
+    .certificate-body h3 {
+        color: #17a2b8 !important;
+    }
+    .certificate-body p, .certificate-footer p {
+        color: #333 !important;
+    }
+    .text-muted {
+        color: #666 !important;
+    }
+    .text-warning {
+        color: gold !important;
+    }
+    /* Prevent page breaks inside certificate */
+    .certificate-container {
+        page-break-inside: avoid;
     }
 }
 </style>
