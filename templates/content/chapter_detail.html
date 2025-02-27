@@ -16,75 +16,89 @@
 <h2>{{ chapter.title }}</h2>
 <p class="lead">{{ chapter.description }}</p>
 
-{% for subchapter in chapter.subchapters %}
-<div class="card mb-4 subchapter-card" data-subchapter-id="{{ subchapter.id }}">
-    <div class="card-header">
-        <h4 class="mb-0 d-flex align-items-center">
-            {{ subchapter.title }}
-            <span class="ms-auto completion-status">
-                <i class="fas fa-check-circle text-success d-none"></i>
-            </span>
-        </h4>
-    </div>
-    <div class="card-body">
-        {% for content in subchapter.contents %}
-        <div class="content-item mb-4">
-            {% if content.content_type == 'text' %}
-                {{ content.content|safe }}
-            {% elif content.content_type == 'video' %}
-                <div class="ratio ratio-16x9">
-                    <iframe src="{{ content.content }}" allowfullscreen></iframe>
+<div class="accordion" id="chapterAccordion">
+    {% for subchapter in chapter.subchapters %}
+    <div class="accordion-item subchapter-card" data-subchapter-id="{{ subchapter.id }}">
+        <h2 class="accordion-header">
+            <button class="accordion-button {% if not loop.first %}collapsed{% endif %}" 
+                    type="button" 
+                    data-bs-toggle="collapse" 
+                    data-bs-target="#collapse{{ subchapter.id }}"
+                    {% if not loop.first %}disabled{% endif %}>
+                {{ subchapter.title }}
+                <span class="ms-auto completion-status">
+                    <i class="fas fa-check-circle text-success d-none"></i>
+                </span>
+            </button>
+        </h2>
+        <div id="collapse{{ subchapter.id }}" 
+             class="accordion-collapse collapse {% if loop.first %}show{% endif %}"
+             data-bs-parent="#chapterAccordion">
+            <div class="accordion-body">
+                {% for content in subchapter.contents %}
+                <div class="content-item mb-4">
+                    {% if content.content_type == 'text' %}
+                        {{ content.content|safe }}
+                    {% elif content.content_type == 'video' %}
+                        <div class="ratio ratio-16x9">
+                            <iframe src="{{ content.content }}" allowfullscreen></iframe>
+                        </div>
+                    {% elif content.content_type == 'link' %}
+                        <a href="{{ content.content }}" target="_blank" class="btn btn-info">
+                            <i class="fas fa-external-link-alt"></i> External Resource
+                        </a>
+                    {% endif %}
                 </div>
-            {% elif content.content_type == 'link' %}
-                <a href="{{ content.content }}" target="_blank" class="btn btn-info">
-                    <i class="fas fa-external-link-alt"></i> External Resource
-                </a>
-            {% endif %}
-        </div>
-        {% endfor %}
+                {% endfor %}
 
-        <div class="navigation-buttons text-center mt-4">
-            {% if not loop.first %}
-            <button class="btn btn-secondary btn-back">
-                <i class="fas fa-arrow-left"></i> Back
-            </button>
-            {% endif %}
-
-            <button class="btn btn-primary btn-next" data-subchapter-id="{{ subchapter.id }}">
-                {% if loop.last %}
-                    Finish <i class="fas fa-flag-checkered"></i>
-                {% else %}
-                    Next <i class="fas fa-arrow-right"></i>
-                {% endif %}
-            </button>
+                <div class="text-center mt-4">
+                    {% if loop.last and loop.parent.last %}
+                    <button class="btn btn-success btn-finish" data-subchapter-id="{{ subchapter.id }}">
+                        <i class="fas fa-flag-checkered"></i> Finish Chapter
+                    </button>
+                    {% else %}
+                    <button class="btn btn-primary btn-done" data-subchapter-id="{{ subchapter.id }}">
+                        <i class="fas fa-check"></i> Done
+                    </button>
+                    {% endif %}
+                </div>
+            </div>
         </div>
     </div>
+    {% endfor %}
 </div>
-{% endfor %}
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Load progress
+    // Load initial progress
     fetch(`/progress/status/{{ chapter.id }}`)
         .then(response => response.json())
         .then(data => {
-            const progressBar = document.querySelector('.progress-bar');
-            progressBar.style.width = data.percentage + '%';
-            progressBar.textContent = data.percentage + '%';
-            progressBar.setAttribute('aria-valuenow', data.percentage);
-
-            // Mark completed subchapters
-            if (data.completed > 0) {
-                document.querySelectorAll('.subchapter-card').forEach((card, index) => {
-                    if (index < data.completed) {
-                        card.querySelector('.completion-status i').classList.remove('d-none');
-                    }
-                });
-            }
+            updateProgress(data);
+            unlockCompletedSubchapters(data.completed);
         });
 
-    // Handle navigation
-    document.querySelectorAll('.btn-next').forEach(button => {
+    function updateProgress(data) {
+        const progressBar = document.querySelector('.progress-bar');
+        progressBar.style.width = data.percentage + '%';
+        progressBar.textContent = data.percentage + '%';
+        progressBar.setAttribute('aria-valuenow', data.percentage);
+    }
+
+    function unlockCompletedSubchapters(completedCount) {
+        const subchapters = document.querySelectorAll('.subchapter-card');
+        subchapters.forEach((card, index) => {
+            if (index <= completedCount) {
+                card.querySelector('.accordion-button').removeAttribute('disabled');
+                if (index < completedCount) {
+                    card.querySelector('.completion-status i').classList.remove('d-none');
+                }
+            }
+        });
+    }
+
+    // Handle Done/Finish button clicks
+    document.querySelectorAll('.btn-done, .btn-finish').forEach(button => {
         button.addEventListener('click', function() {
             const subchapterId = this.dataset.subchapterId;
             fetch(`/progress/${subchapterId}/complete`, {
@@ -98,29 +112,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (data.redirect) {
                     window.location.href = data.redirect;
                 } else {
-                    // Update progress bar
+                    // Update progress and unlock next subchapter
                     fetch(`/progress/status/{{ chapter.id }}`)
                         .then(response => response.json())
                         .then(progressData => {
-                            const progressBar = document.querySelector('.progress-bar');
-                            progressBar.style.width = progressData.percentage + '%';
-                            progressBar.textContent = progressData.percentage + '%';
-                            progressBar.setAttribute('aria-valuenow', progressData.percentage);
+                            updateProgress(progressData);
+                            unlockCompletedSubchapters(progressData.completed);
                         });
                 }
             });
-        });
-    });
-
-    // Handle back button
-    document.querySelectorAll('.btn-back').forEach(button => {
-        button.addEventListener('click', function() {
-            const currentCard = this.closest('.subchapter-card');
-            const prevCard = currentCard.previousElementSibling;
-            if (prevCard) {
-                currentCard.classList.add('d-none');
-                prevCard.classList.remove('d-none');
-            }
         });
     });
 });
