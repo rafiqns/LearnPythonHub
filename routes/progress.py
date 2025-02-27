@@ -34,13 +34,11 @@ def complete_subchapter(subchapter_id):
             .order_by(SubChapter.order.desc()).first()
 
         if last_subchapter and subchapter.id == last_subchapter.id:
-            # Check if this is the last chapter
-            last_chapter = Chapter.query.order_by(Chapter.order.desc()).first()
-            if last_chapter and subchapter.chapter_id == last_chapter.id:
-                progress.certificate_generated = True
-                db.session.commit()
-                return jsonify({'redirect': url_for('progress.show_certificate', 
-                                                chapter_id=last_chapter.id)})
+            # Aktifkan sertifikat untuk chapter ini
+            progress.certificate_generated = True
+            db.session.commit()
+            return jsonify({'redirect': url_for('progress.show_certificate', 
+                                            chapter_id=subchapter.chapter_id)})
 
         return jsonify({'status': 'success'})
     except Exception as e:
@@ -51,23 +49,20 @@ def complete_subchapter(subchapter_id):
 @login_required
 def show_certificate(chapter_id):
     chapter = Chapter.query.get_or_404(chapter_id)
-    # Cek apakah ini chapter terakhir
-    last_chapter = Chapter.query.order_by(Chapter.order.desc()).first()
     
-    if chapter.id == last_chapter.id:
-        # Cek apakah pengguna telah menyelesaikan semua subchapter
-        subchapters = SubChapter.query.filter_by(chapter_id=chapter_id).all()
-        subchapter_ids = [s.id for s in subchapters]
-        completed_count = UserProgress.query.filter(
-            UserProgress.user_id == current_user.id,
-            UserProgress.subchapter_id.in_(subchapter_ids),
-            UserProgress.completed == True
-        ).count()
-        
-        if completed_count == len(subchapters):
-            return render_template('progress/certificate.html', chapter=chapter)
+    # Cek apakah pengguna telah menyelesaikan semua subchapter di chapter ini
+    subchapters = SubChapter.query.filter_by(chapter_id=chapter_id).all()
+    subchapter_ids = [s.id for s in subchapters]
+    completed_count = UserProgress.query.filter(
+        UserProgress.user_id == current_user.id,
+        UserProgress.subchapter_id.in_(subchapter_ids),
+        UserProgress.completed == True
+    ).count()
     
-    # Jika belum menyelesaikan chapter terakhir, redirect ke chapter detail
+    if completed_count == len(subchapters):
+        return render_template('progress/certificate.html', chapter=chapter)
+    
+    # Jika belum menyelesaikan chapter, redirect ke chapter detail
     return redirect(url_for('content.chapter_detail', chapter_id=chapter_id))
 
 @progress_bp.route('/progress/status/<int:chapter_id>')
