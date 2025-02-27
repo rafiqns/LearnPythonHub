@@ -29,37 +29,18 @@ def complete_subchapter(subchapter_id):
         db.session.commit()
         logging.info(f"User {current_user.username} completed subchapter {subchapter_id}")
 
-        # Check if this was the last subchapter in the last chapter
-        all_chapters = Chapter.query.order_by(Chapter.order).all()
-        last_chapter = all_chapters[-1] if all_chapters else None
+        # Check if this was the last subchapter in the chapter
+        last_subchapter = SubChapter.query.filter_by(chapter_id=subchapter.chapter_id)\
+            .order_by(SubChapter.order.desc()).first()
 
-        if last_chapter and subchapter.chapter_id == last_chapter.id:
-            last_subchapter = SubChapter.query.filter_by(chapter_id=last_chapter.id)\
-                .order_by(SubChapter.order.desc()).first()
-
-            if last_subchapter and subchapter.id == last_subchapter.id:
+        if last_subchapter and subchapter.id == last_subchapter.id:
+            # Check if this is the last chapter
+            last_chapter = Chapter.query.order_by(Chapter.order.desc()).first()
+            if last_chapter and subchapter.chapter_id == last_chapter.id:
                 progress.certificate_generated = True
                 db.session.commit()
                 return jsonify({'redirect': url_for('progress.show_certificate', 
                                                 chapter_id=last_chapter.id)})
-
-        # Check if next subchapter exists in current chapter
-        next_subchapter = SubChapter.query.filter(
-            SubChapter.chapter_id == subchapter.chapter_id,
-            SubChapter.order > subchapter.order
-        ).first()
-
-        if not next_subchapter and subchapter.chapter_id != last_chapter.id:
-            # Move to the first subchapter of the next chapter
-            next_chapter = Chapter.query.filter(
-                Chapter.order > subchapter.chapter.order
-            ).first()
-            if next_chapter:
-                first_subchapter = SubChapter.query.filter_by(chapter_id=next_chapter.id)\
-                    .order_by(SubChapter.order).first()
-                if first_subchapter:
-                    return jsonify({'redirect': url_for('content.chapter_detail', 
-                                                    chapter_id=next_chapter.id)})
 
         return jsonify({'status': 'success'})
     except Exception as e:

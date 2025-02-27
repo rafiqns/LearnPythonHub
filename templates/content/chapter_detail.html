@@ -54,10 +54,18 @@
                     <button class="btn btn-success btn-complete-course" data-subchapter-id="{{ subchapter.id }}">
                         <i class="fas fa-graduation-cap"></i> Complete Course
                     </button>
+                    <a href="{{ url_for('content.index') }}" class="btn btn-secondary">
+                        <i class="fas fa-home"></i> Back to Chapters
+                    </a>
                     {% elif loop.last %}
-                    <button class="btn btn-success btn-finish" data-subchapter-id="{{ subchapter.id }}">
-                        <i class="fas fa-flag-checkered"></i> Finish Chapter
-                    </button>
+                    <div class="d-flex justify-content-center gap-2">
+                        <button class="btn btn-primary btn-done" data-subchapter-id="{{ subchapter.id }}">
+                            <i class="fas fa-check"></i> Done
+                        </button>
+                        <a href="{{ url_for('content.index') }}" class="btn btn-secondary">
+                            <i class="fas fa-home"></i> Back to Chapters
+                        </a>
+                    </div>
                     {% else %}
                     <button class="btn btn-primary btn-done" data-subchapter-id="{{ subchapter.id }}">
                         <i class="fas fa-check"></i> Done
